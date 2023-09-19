@@ -1,12 +1,7 @@
 #include "./include/JackTokenizer.h"
 
-
-
 Tokenizer::Tokenizer(std::string filename):
-_srcFile(filename),
-_nowLine(0),
-_index(0)
-{
+_srcFile(filename), _nowLine(0), _index(0) {
     if (!_srcFile.is_open()) {
         std::cout << "open " << filename << " failed!" << std::endl;
     }
@@ -17,14 +12,11 @@ _index(0)
     
 }
 
-
-Tokenizer::~Tokenizer()
-{
+Tokenizer::~Tokenizer() {
     _srcFile.close();
 }
 
-void Tokenizer::initKeywordsAndSymbols()
-{
+void Tokenizer::initKeywordsAndSymbols() {
     _symbols = "{}()[].,;+-*&|<>=~";
     _keywords.push_back("class");
     _keywords.push_back("constructor");
@@ -49,16 +41,14 @@ void Tokenizer::initKeywordsAndSymbols()
     _keywords.push_back("return");
 }
 
-bool Tokenizer::isIdentifierChar(char c)
-{
+bool Tokenizer::isIdentifierChar(char c) {
     return ((c >= 'A' && c <= 'Z') || 
             (c >= 'a' && c <= 'z') ||
             (c >= '0' && c <= '9') ||
             (c == '_'));
 }
 
-bool Tokenizer::isKeyword(const std::string& str)
-{
+bool Tokenizer::isKeyword(const std::string& str) {
     for (auto i : _keywords) {
         if (i == str) 
             return true;
@@ -66,16 +56,14 @@ bool Tokenizer::isKeyword(const std::string& str)
     return false;
 }
 
-
-bool Tokenizer::hasMoreTokens()
-{
+// 把整个文件读取出来， 然后比较大小。
+bool Tokenizer::hasMoreTokens() {
     if (_index < _srcCode.size()) 
         return true;
     return false;
 }
 
-void Tokenizer::advance()
-{
+void Tokenizer::advance() {
     while (true) {
         if (_index >= _srcCode.size())
             break;
@@ -146,36 +134,26 @@ void Tokenizer::advance()
 }
 
 
-Tokenizer::tokentype Tokenizer::tokenType()
-{
+Tokenizer::tokentype Tokenizer::tokenType() {
     return _token.type;
 }
 
-std::string Tokenizer::keyWord()
-{
+std::string Tokenizer::keyWord() {
     return std::get<std::string>(_token.val);
 }
 
-std::string Tokenizer::stringVal()
-{
+std::string Tokenizer::stringVal() {
     return std::get<std::string>(_token.val);
 }
 
-std::string Tokenizer::identifier()
-{
+std::string Tokenizer::identifier() {
     return std::get<std::string>(_token.val);
 }
 
-std::size_t Tokenizer::intVal()
-{
+std::size_t Tokenizer::intVal() {
     return std::get<int>(_token.val);
 }
 
-std::string Tokenizer::symbol()
-{
+std::string Tokenizer::symbol() {
     return std::get<std::string>(_token.val);
 }
-
-
-
-

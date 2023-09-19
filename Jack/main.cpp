@@ -5,15 +5,12 @@
 #include <iostream>
 #include <string.h>
 
-
-
 template<typename T>
-std::vector<std::string> get_File(std::string Path, T&& f)
-{
+std::vector<std::string> get_File(std::string Path, T&& f) {
     struct stat st;
     if (stat(Path.c_str(), &st)) {
         std::cout << "get file stat faild!" << std::endl;
-        return{};
+        return {};
     }
     std::vector<std::string > files;
     if (S_ISDIR(st.st_mode)) {
@@ -23,18 +20,14 @@ std::vector<std::string> get_File(std::string Path, T&& f)
                    files.push_back(Path + "/" + info->d_name);
                } 
             }   
-    }
-    else
+    } else {
         if (strlen(Path.c_str()) >  5 && f(Path))
             files.push_back(Path);
+    }
     return files;
 }
 
-
-
-
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     std::vector<std::string> files = get_File(argv[1],
     [](std::string file){
         if (file.find(".jack") != -1) 

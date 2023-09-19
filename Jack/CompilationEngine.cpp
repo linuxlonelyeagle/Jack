@@ -1,21 +1,18 @@
 #include "./include/CompilationEngine.h"
 
-// 处理if
+/// 处理if
 const std::string ifTureLable = "IF_TRUE";
 const std::string ifFalseLable = "IF_FALSE";
 const std::string ifEndLable = "IF_END";
 
-//处理while
+///处理while
 const std::string whileStart = "WHILE_START";
 const std::string whileEnd = "WHILE_END";
 
-
 CompilationEngine::CompilationEngine(const std::string& src_file, const std::string& vm_file):
-_vmwriter(vm_file),
-ifIndex(0)
-{
+_vmwriter(vm_file), ifIndex(0) {
+    /// 输出要处理的文件
     std::cout << src_file << std::endl;
-
     auto index1 = src_file.find_last_of('/');
     auto index2 = src_file.find(".jack");
     auto temp = src_file.substr(0, index2);
@@ -27,14 +24,12 @@ ifIndex(0)
    _classSymbolTable.startSubroutine();
 }
 
-CompilationEngine::~CompilationEngine()
-{
+CompilationEngine::~CompilationEngine() {
     _writer.close();
 }
 
 
-void CompilationEngine::initTokens(std::string filename)
-{
+void CompilationEngine::initTokens(std::string filename) {
     Tokenizer t(filename);
     while (t.hasMoreTokens()) {
         t.advance();
@@ -60,8 +55,7 @@ void CompilationEngine::initTokens(std::string filename)
     }
 }
 
-void CompilationEngine::mapInit()
-{
+void CompilationEngine::mapInit() {
     _tokenTypeMap[KEYWORD] = "keyword";
     _tokenTypeMap[INT_CONST] = "integerConstant";
     _tokenTypeMap[SYMBOL] = "symbol";
@@ -79,14 +73,11 @@ void CompilationEngine::mapInit()
 
 }
 
-
-void CompilationEngine::tokenAdvance()
-{
+void CompilationEngine::tokenAdvance() {
     _tokens_pointer++;
 }
 
-void CompilationEngine::printTokens()
-{
+void CompilationEngine::printTokens() {
     for (auto i = _tokens_pointer; i != _tokens.end(); i++) {
         std::cout << i->val << " ";
     }
@@ -94,33 +85,28 @@ void CompilationEngine::printTokens()
 }
 
 
-void CompilationEngine::writeXmlLeftTag(const std::string& tag)
-{
+void CompilationEngine::writeXmlLeftTag(const std::string& tag) {
     std::string temp = "<" + tag + ">\n";
     _writer.write(temp.c_str(), temp.size());  
 }
 
-void CompilationEngine::writeXmlRightTag(const std::string& tag)
-{
+void CompilationEngine::writeXmlRightTag(const std::string& tag) {
     std::string temp = "</" + tag + ">\n";
     _writer.write(temp.c_str(), temp.size());
 }
 
-void CompilationEngine::writeXmlTag(const std::string& val, const std::string& type)
-{
+void CompilationEngine::writeXmlTag(const std::string& val, const std::string& type) {
     std::string temp = "<" + type + ">" + val + "</" + type + ">\n";
     _writer.write(temp.c_str(), temp.size());
 }
 
-void CompilationEngine::error(const std::string& info)
-{
+void CompilationEngine::error(const std::string& info) {
     std::cout << info << std::endl;
     _writer.close();
     exit(0);
 }
 
-void CompilationEngine::eat(std::string symbol)
-{
+void CompilationEngine::eat(std::string symbol) {
     if (symbol == _tokens_pointer->val) {
         if (symbol == "<")
         writeXmlTag("&lt;", _tokenTypeMap[_tokens_pointer->type]);
@@ -139,8 +125,7 @@ void CompilationEngine::eat(std::string symbol)
     }
 }
 
-void CompilationEngine::eatIdentifier()
-{
+void CompilationEngine::eatIdentifier() {
     if (_tokens_pointer->type == IDENTIFIER) {
         writeXmlTag(_tokens_pointer->val, _tokenTypeMap[_tokens_pointer->type]);       
         tokenAdvance(); 
@@ -150,8 +135,7 @@ void CompilationEngine::eatIdentifier()
     }     
 }
 
-void CompilationEngine::CompileClass()
-{
+void CompilationEngine::CompileClass() {
     writeXmlLeftTag("class");
     eat("class");
     eatIdentifier();
@@ -163,8 +147,7 @@ void CompilationEngine::CompileClass()
     writeXmlRightTag("class");
 }
 
-void CompilationEngine::eatType()
-{
+void CompilationEngine::eatType() {
     if (_tokens_pointer->val == "int" ||
         _tokens_pointer->val == "void" ||
         _tokens_pointer->val == "char" ||
@@ -179,8 +162,7 @@ void CompilationEngine::eatType()
 }
 
 
-bool CompilationEngine::eatOptional(const std::string& symbol)
-{
+bool CompilationEngine::eatOptional(const std::string& symbol) {
     if (symbol == _tokens_pointer->val) {
         if (symbol == "<")
         writeXmlTag("&lt;", _tokenTypeMap[_tokens_pointer->type]);
@@ -198,8 +180,7 @@ bool CompilationEngine::eatOptional(const std::string& symbol)
     return false;
 }
 
-void CompilationEngine::CompileClassVarDec()
-{
+void CompilationEngine::CompileClassVarDec() {
     auto kind = _tokens_pointer->val;
     if (_tokens_pointer->val == "static" || _tokens_pointer->val == "field") {
         writeXmlLeftTag("classVarDec");
@@ -223,8 +204,7 @@ void CompilationEngine::CompileClassVarDec()
 }
 
 
-void CompilationEngine::CompileSubroutineDec()
-{
+void CompilationEngine::CompileSubroutineDec() {
     _subruntSymbolTable.startSubroutine();
     bool isMethod = false;
     bool isConstructor = false;
@@ -258,8 +238,7 @@ void CompilationEngine::CompileSubroutineDec()
 }
 
 
-void CompilationEngine::compileParameterList(bool isMethod)
-{   // 必须先写lefttag
+void CompilationEngine::compileParameterList(bool isMethod) {   // 必须先写lefttag
     if (isMethod) 
         _subruntSymbolTable.define("this", _class, "argument");
     writeXmlLeftTag("parameterList");  
@@ -279,8 +258,7 @@ void CompilationEngine::compileParameterList(bool isMethod)
     writeXmlRightTag("parameterList");   
 }
 
-void CompilationEngine::CompileExpressionList(const std::string& objname, bool ismethod)
-{
+void CompilationEngine::CompileExpressionList(const std::string& objname, bool ismethod) {
     writeXmlLeftTag("expressionList");
 
     auto argcount = 0;
@@ -303,8 +281,7 @@ void CompilationEngine::CompileExpressionList(const std::string& objname, bool i
 
 
 
-void CompilationEngine::compileSubroutineBody(std::string functionname, bool isconstructor, bool ismethod)
-{
+void CompilationEngine::compileSubroutineBody(std::string functionname, bool isconstructor, bool ismethod) {
     std::size_t varcount = 0;
     writeXmlLeftTag("subroutineBody");
     eat("{");
@@ -319,8 +296,7 @@ void CompilationEngine::compileSubroutineBody(std::string functionname, bool isc
     writeXmlRightTag("subroutineBody");
 }
 
-void CompilationEngine::compileVarDec(std::size_t& varcount)
-{
+void CompilationEngine::compileVarDec(std::size_t& varcount) {
     writeXmlLeftTag("varDec");
     eat("var");
     auto type = _tokens_pointer->val;
@@ -339,15 +315,13 @@ void CompilationEngine::compileVarDec(std::size_t& varcount)
     writeXmlRightTag("varDec");
 }
 
-void CompilationEngine::compileStatements()
-{
+void CompilationEngine::compileStatements() {
     writeXmlLeftTag("statements");
     compileStatement();
     writeXmlRightTag("statements");
 }
 
-void CompilationEngine::compileStatement()
-{
+void CompilationEngine::compileStatement() {
     if (_tokens_pointer->val == "let") 
         compileLet();
     else if (_tokens_pointer->val == "if")
@@ -364,8 +338,7 @@ void CompilationEngine::compileStatement()
     compileStatement();
 }
 
-void CompilationEngine::compileLet()
-{
+void CompilationEngine::compileLet() {
     writeXmlLeftTag("letStatement");
     eat("let");
     auto varname = _tokens_pointer->val;
@@ -391,8 +364,7 @@ void CompilationEngine::compileLet()
     writeXmlRightTag("letStatement");
 }
 
-void CompilationEngine::compileIf()
-{
+void CompilationEngine::compileIf() {
     writeXmlLeftTag("ifStatement");
     std::string ifindexstr = std::to_string(ifIndex++);
     eat("if");
@@ -416,8 +388,7 @@ void CompilationEngine::compileIf()
     writeXmlRightTag("ifStatement");
 }
 
-void CompilationEngine::compileWhile()
-{
+void CompilationEngine::compileWhile() {
     writeXmlLeftTag("whileStatement");
     auto index = std::to_string(ifIndex++);
     _vmwriter.writeLabel(whileStart + index);
@@ -436,8 +407,7 @@ void CompilationEngine::compileWhile()
     writeXmlRightTag("whileStatement"); 
 }
 
-void CompilationEngine::compileDo()
-{
+void CompilationEngine::compileDo() {
    writeXmlLeftTag("doStatement");
    eat("do");
    compileSubrountineCall();
@@ -446,8 +416,7 @@ void CompilationEngine::compileDo()
    writeXmlRightTag("doStatement"); 
 }
 
-void CompilationEngine::compileSubrountineCall()
-{
+void CompilationEngine::compileSubrountineCall() {
     auto subname = _tokens_pointer->val;
     // 如果变量定义过，就不会返回null
     auto subtype = getType(subname);   // 如果是对象的化,获取这个对象的类型
@@ -477,8 +446,7 @@ void CompilationEngine::compileSubrountineCall()
         error("compilesubrountinecall error!");
 }
 
-void CompilationEngine::compileReturn()
-{
+void CompilationEngine::compileReturn() {
     writeXmlLeftTag("returnStatement");
     eat("return");
     if (!eatOptional(";")) {
@@ -494,8 +462,7 @@ void CompilationEngine::compileReturn()
     writeXmlRightTag("returnStatement");
 }
 
-void CompilationEngine::CompileExpression()
-{
+void CompilationEngine::CompileExpression() {
     writeXmlLeftTag("expression");
     CompileTerm();
     std::string op = "+-*/&|<>=";
@@ -508,9 +475,7 @@ void CompilationEngine::CompileExpression()
     writeXmlRightTag("expression");
 }
 
-void CompilationEngine::CompileTerm()
-{
-
+void CompilationEngine::CompileTerm() {
     auto val = _tokens_pointer->val;
     auto type = _tokens_pointer->type;
 
@@ -578,13 +543,11 @@ void CompilationEngine::CompileTerm()
     }
 }
 
-void CompilationEngine::printsymboltable()
-{
+void CompilationEngine::printsymboltable() {
     _classSymbolTable.printSymbolTable();
 }
 
-void CompilationEngine::pushVar(std::string var_name)
-{
+void CompilationEngine::pushVar(std::string var_name) {
     auto kind = _subruntSymbolTable.kindOf(var_name);
     if (kind == "null") {
         kind = _classSymbolTable.kindOf(var_name);
@@ -598,8 +561,7 @@ void CompilationEngine::pushVar(std::string var_name)
     }
 }
 
-void CompilationEngine::popVar(std::string varname)
-{
+void CompilationEngine::popVar(std::string varname) {
     auto kind = _subruntSymbolTable.kindOf(varname);
     if (kind == "null") {
         kind = _classSymbolTable.kindOf(varname);
@@ -613,9 +575,7 @@ void CompilationEngine::popVar(std::string varname)
     }
 }
 
-
-void CompilationEngine::setPointer(bool isConstructor, bool isMethod)
-{
+void CompilationEngine::setPointer(bool isConstructor, bool isMethod) {
     if (isConstructor) {
         auto num = _classSymbolTable.varCount("field");
         _vmwriter.writePush("constant", num);
@@ -629,9 +589,7 @@ void CompilationEngine::setPointer(bool isConstructor, bool isMethod)
     }
 }
 
-
-std::string CompilationEngine::getType(const std::string& name)
-{
+std::string CompilationEngine::getType(const std::string& name) {
     auto type = _subruntSymbolTable.typeOf(name);
     if (type == "null") {
         type = _classSymbolTable.typeOf(name);

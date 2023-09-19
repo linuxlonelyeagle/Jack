@@ -33,5 +33,4 @@ class SymbolTable{
         void printSymbolTable();
 };
 
-
 #endif
