@@ -5,3 +5,5 @@ This repository is a learning experience for *The Elements Of Computing Systems*
 I like the words of Shimon Schocken:The important thing is to be a mensch.To be human and to do the right thing.
 
 Thank you!
+
+Today is February 7, 2024, and I think my sophomore dream of going to write code for llvm has come true.I'll do more for the community in the future!Thank you to all who have helped me.
